@@ -20,8 +20,8 @@ class SimulationGraph:
 
         print("self.episode:", episode)
 
-        f1 = "sims/" + "locations_" + str(episode) + ".npy"
-        f2 = "sims/" + "rewards_" + str(episode) + ".npy"
+        f1 = "sims/2/" + "locations_" + str(episode) + ".npy"
+        f2 = "sims/2/" + "rewards_" + str(episode) + ".npy"
 
         np.save(f1, nparr)
         np.save(f2, np_rewards)

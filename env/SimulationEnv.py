@@ -58,8 +58,8 @@ class SimulationEnv(gym.Env):
 
     def calculate_advantage(self, w1=0.5, w2=0.5):
         self.current_reward[0], self.current_reward[1] = get_na(self.uav1, self.uav2), get_nd(self.uav1, self.uav2)
-        adv = w1 * get_na(self.uav1, self.uav2) + w2 * get_nd(self.uav1, self.uav2) - self.current_step * 0.005, \
-              w1 * get_na(self.uav2, self.uav1) + w2 * get_nd(self.uav2, self.uav1) - self.current_step * 0.005
+        adv = w1 * get_na(self.uav1, self.uav2) + w2 * get_nd(self.uav1, self.uav2) - self.current_step * 0.01, \
+              w1 * get_na(self.uav2, self.uav1) + w2 * get_nd(self.uav2, self.uav1) - self.current_step * 0.01
         return adv
 
     def _next_observation(self, uav1, uav2):
@@ -119,7 +119,6 @@ class SimulationEnv(gym.Env):
             uav.position[1] += uav.der_y * self.dt
             uav.position[2] += uav.der_z * self.dt
 
-
     def step(self, action):
         # Execute one time step within the environment
         self._take_action(action)
@@ -128,7 +127,7 @@ class SimulationEnv(gym.Env):
 
         self.current_step += 1
 
-        thresh = 13 - self.current_step * 0.005
+        thresh = 12 - self.current_step * 0.01
 
         reward, rival_reward = self.calculate_advantage()
 
