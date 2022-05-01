@@ -13,7 +13,7 @@ from PPO.network import FeedForwardNN
 from PPO.eval_policy import eval_policy
 
 
-def train(env, hyperparameters, actor_model, critic_model, rival_actor):
+def train(env, hyperparameters, args):
 	"""
 		Trains the model.
 		Parameters:
@@ -27,15 +27,15 @@ def train(env, hyperparameters, actor_model, critic_model, rival_actor):
 	print(f"Training", flush=True)
 
 	# Create a model for PPO.
-	model = PPO(policy_class=FeedForwardNN, env=env, rival_actor=rival_actor, ** hyperparameters)
+	model = PPO(policy_class=FeedForwardNN, env=env, args=args, ** hyperparameters)
 
 	# Tries to load in an existing actor/critic model to continue training on
-	if actor_model != '' and critic_model != '':
-		print(f"Loading in {actor_model} and {critic_model}...", flush=True)
-		model.actor.load_state_dict(torch.load(actor_model))
-		model.critic.load_state_dict(torch.load(critic_model))
+	if args.actor_model != '' and args.critic_model != '':
+		print(f"Loading in {args.actor_model} and {args.critic_model}...", flush=True)
+		model.actor.load_state_dict(torch.load(args.actor_model))
+		model.critic.load_state_dict(torch.load(args.critic_model))
 		print(f"Successfully loaded.", flush=True)
-	elif actor_model != '' or critic_model != '':  # Don't train scratch if user accidentally forgets actor/critic model
+	elif args.actor_model != '' or args.critic_model != '':  # Don't train scratch if user accidentally forgets actor/critic model
 		print("Error: Either specify both actor/critic models or none at all.")
 		print("We don't want to accidentally override anything!")
 		sys.exit(0)
@@ -111,12 +111,12 @@ def main(arguments):
 
 	# Train or test, depending on the mode specified
 	if arguments.mode == 'train':
-		train(env=env, hyperparameters=hyperparameters, actor_model=arguments.actor_model,
-			critic_model=arguments.critic_model, rival_actor=arguments.rival_actor_model)
+		train(env=env, hyperparameters=hyperparameters, args=arguments)
 	else:
 		test(env=env, actor_model=arguments.actor_model)
 
 
 if __name__ == '__main__':
 	args = get_args()  # Parse arguments from command line
+	print(args)
 	main(args)

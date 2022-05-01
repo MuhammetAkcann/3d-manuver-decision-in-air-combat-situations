@@ -23,7 +23,7 @@ class PPO:
         This is the PPO class we will use as our model in main.py
     """
 
-    def __init__(self, policy_class, env, rival_actor, **hyperparameters):
+    def __init__(self, policy_class, env, args, **hyperparameters):
         """
             Initializes the PPO model, including hyperparameters.
             Parameters:
@@ -47,11 +47,14 @@ class PPO:
         self.act_dim = env.action_space.shape[0]
 
         self.rival_policy = FeedForwardNN(self.obs_dim, self.act_dim)
-        self.rival_policy.load_state_dict(torch.load(rival_actor))
+        self.rival_policy.load_state_dict(torch.load(args.rival_actor))
 
         # Initialize actor and critic networks
         self.actor = policy_class(self.obs_dim, self.act_dim)  # ALG STEP 1
         self.critic = policy_class(self.obs_dim, 1)
+
+        self.shadows = args.shadows
+        self.noises = args.noises
 
         # Initialize optimizers for actor and critic
         self.actor_optim = Adam(self.actor.parameters(), lr=self.lr)
@@ -78,13 +81,20 @@ class PPO:
             'batch_draw': []
         }
 
-    def arrange_observation(obs, x):
+
+
+    def arrange_observation(self,obs):
         """
             x parametresine göre yaw pitch roll position çikarilacak
             y parametresine göre noise eklenip çikarilacak
             eğer x e göre shadowlama yapildiysa rivalin eski posisyonu eklencek
         """
-        pass
+        noises = np.random.normal(0, 0.05, 11)
+        noises = np.multiply(noises, self.noises)
+        noised_obs = np.add(obs, noises)
+        
+        masked_obs = np.multiply(noised_obs, self.shadows)
+        return masked_obs
 
     def learn(self, total_timesteps):
         """
@@ -230,6 +240,7 @@ class PPO:
                 both_action = np.concatenate((action, rival_action), axis=None)
 
                 obs, rival_obs, rew, done, rival_rew = self.env.step(both_action)
+                self.arrange_observation(obs)
                 # Track recent reward, action, and action log probability
                 ep_rews.append(rew)
                 ep_rews_rival.append(rival_rew)
