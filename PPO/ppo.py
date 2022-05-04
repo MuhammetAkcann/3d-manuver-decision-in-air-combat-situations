@@ -12,7 +12,7 @@ import torch.nn as nn
 from torch.optim import Adam
 from torch.distributions import MultivariateNormal
 from PPO.network import FeedForwardNN
-
+from collections import deque
 from torch.utils.tensorboard import SummaryWriter
 
 writer = SummaryWriter()
@@ -42,6 +42,7 @@ class PPO:
 
         # Extract environment information
         self.env = env
+        self.use_last_n_state = 50
 
         self.obs_dim = env.observation_space.shape[0]
         self.act_dim = env.action_space.shape[0]
@@ -50,8 +51,8 @@ class PPO:
         self.rival_policy.load_state_dict(torch.load(args.rival_actor))
 
         # Initialize actor and critic networks
-        self.actor = policy_class(self.obs_dim, self.act_dim)  # ALG STEP 1
-        self.critic = policy_class(self.obs_dim, 1)
+        self.actor = policy_class(self.obs_dim * self.use_last_n_state, self.act_dim)  # ALG STEP 1
+        self.critic = policy_class(self.obs_dim * self.use_last_n_state, 1)
 
         self.shadows = args.shadows
         self.noises = args.noises
@@ -81,9 +82,7 @@ class PPO:
             'batch_draw': []
         }
 
-
-
-    def arrange_observation(self,obs):
+    def arrange_observation(self, obs):
         """
             x parametresine göre yaw pitch roll position çikarilacak
             y parametresine göre noise eklenip çikarilacak
@@ -92,7 +91,7 @@ class PPO:
         noises = np.random.normal(0, 0.05, 11)
         noises = np.multiply(noises, self.noises)
         noised_obs = np.add(obs, noises)
-        
+
         masked_obs = np.multiply(noised_obs, self.shadows)
         return masked_obs
 
@@ -219,6 +218,14 @@ class PPO:
             ep_rews_rival = []
             # Reset the environment. sNote that obs is short for observation.
             obs, rival_obs = self.env.reset()
+            obs = self.arrange_observation(obs)
+
+            # initialize observation space to be used in time series
+            expanded_obs = np.zeros(obs.shape[0] * self.use_last_n_state)
+
+            # Queue operation for numpy array
+            expanded_obs[:-obs.shape[0]] = expanded_obs[obs.shape[0]:]
+            expanded_obs[-obs.shape[0]:] = obs
 
             # Run an episode for a maximum of max_timesteps_per_episode timesteps
             for ep_t in range(self.max_timesteps_per_episode):
@@ -228,19 +235,24 @@ class PPO:
                     pass
 
                 # Track observations in this batch
-                batch_obs.append(obs)
+                batch_obs.append(expanded_obs)
 
                 # Calculate action and make a step in the env.
                 # Note that rew is short for reward.
 
                 rival_action = self.rival_policy(rival_obs).detach().numpy()
 
-                action, log_prob = self.get_action(obs)
+                action, log_prob = self.get_action(expanded_obs)
 
                 both_action = np.concatenate((action, rival_action), axis=None)
 
                 obs, rival_obs, rew, done, rival_rew = self.env.step(both_action)
-                self.arrange_observation(obs)
+                obs = self.arrange_observation(obs)
+
+                # Queue operation for numpy array
+                expanded_obs[:-obs.shape[0]] = expanded_obs[obs.shape[0]:]
+                expanded_obs[-obs.shape[0]:] = obs
+
                 # Track recent reward, action, and action log probability
                 ep_rews.append(rew)
                 ep_rews_rival.append(rival_rew)
@@ -286,7 +298,7 @@ class PPO:
         self.logger['batch_lose'] = batch_lose
         self.logger['batch_draw'] = batch_draw
 
-        return batch_obs, batch_acts, batch_log_probs, batch_rtgs, batch_lens, batch_win, batch_lose, batch_draw #, batch_rtgs_rival
+        return batch_obs, batch_acts, batch_log_probs, batch_rtgs, batch_lens, batch_win, batch_lose, batch_draw  # , batch_rtgs_rival
 
     def compute_rtgs(self, batch_rews):
         """
@@ -477,7 +489,8 @@ class PPO:
         print("[Avg,Max,Min Reward]", avg_50_reward, max_50_reward, min_50_reward)
         print("Rival [Avg,Max,Min Reward]", avg_50_reward_rival, max_50_reward_rival, min_50_reward_rival)
         print("List Array Length Loss, Reward", len(loss_array), len(reward_array))
-        print("wins loses draws", self.logger['batch_win'][0], self.logger['batch_lose'][0], self.logger['batch_draw'][0])
+        print("wins loses draws", self.logger['batch_win'][0], self.logger['batch_lose'][0],
+              self.logger['batch_draw'][0])
         print(f"------------------------------------------------------", flush=True)
         print(flush=True)
 

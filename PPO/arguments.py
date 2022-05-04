@@ -53,7 +53,9 @@ def get_args():
             shadows[9] = 0
         elif shadow == 'rival_speed':
             shadows[10] = 0
-
+        else:
+            print("given input is not valid")
+            exit(0)
     for noise in args.noises:
         if noise == 'pos_dif_x':
             noises[0] = 1
@@ -77,7 +79,9 @@ def get_args():
             noises[9] = 1
         elif noise == 'rival_speed':
             noises[10] = 1
-
+        else:
+            print("given input is not valid")
+            exit(0)
     args.shadows = shadows
     args.noises = noises
     return args
