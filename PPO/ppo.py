@@ -240,7 +240,7 @@ class PPO:
                 both_action = np.concatenate((action, rival_action), axis=None)
 
                 obs, rival_obs, rew, done, rival_rew = self.env.step(both_action)
-                self.arrange_observation(obs)
+                obs = self.arrange_observation(obs)
                 # Track recent reward, action, and action log probability
                 ep_rews.append(rew)
                 ep_rews_rival.append(rival_rew)
