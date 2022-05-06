@@ -69,13 +69,13 @@ for i in sims:
     counter = 0
     fig = plt.figure()
     ax = p3.Axes3D(fig)
-    ax.set_xlim3d([-40, 100.0])
+    ax.set_xlim3d([-50, 50.0])
     ax.set_xlabel('X')
 
-    ax.set_ylim3d([-40.0, 100.0])
+    ax.set_ylim3d([-50.0, 50.0])
     ax.set_ylabel('Y')
 
-    ax.set_zlim3d([-40.0, 100.0])
+    ax.set_zlim3d([-50.0, 50.0])
     ax.set_zlabel('Z')
     blue = np.array([nparr[0][0], nparr[1][0], nparr[2][0]])
     red = np.array([nparr[0][1], nparr[1][1], nparr[2][1]])
@@ -83,7 +83,7 @@ for i in sims:
     print(len(data[0][0]))
     lines = [ax.plot(dat[0, 0:1], dat[1, 0:1], dat[2, 0:1])[0] for dat in data]
     line_ani = animation.FuncAnimation(fig, update_lines, len(data[0][0]), fargs=(data, lines),
-                                       interval=5, blit=True)
+                                       interval=50, blit=True)
 
     plt.show()
     plt.close()
