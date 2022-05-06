@@ -228,7 +228,7 @@ class PPO:
                     pass
 
                 # Track observations in this batch
-                batch_obs.append(obs.tolist())
+                batch_obs.append(obs)
 
                 # Calculate action and make a step in the env.
                 # Note that rew is short for reward.
@@ -245,8 +245,8 @@ class PPO:
                 ep_rews.append(rew)
                 ep_rews_rival.append(rival_rew)
 
-                batch_acts.append(action.tolist())
-                batch_log_probs.append(log_prob.tolist())
+                batch_acts.append(action)
+                batch_log_probs.append(log_prob)
 
                 # If the environment tells us the episode is terminated, break
                 if done != 0:
