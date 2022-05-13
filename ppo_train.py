@@ -101,7 +101,7 @@ def main(arguments):
 		'lr': 3e-4,
 		'clip': 0.2,
 		'render': True,
-		'render_every_i': 10
+		'render_every_i': 5
 	}
 
 	# Creates the environment we'll be running. If you want to replace with your own

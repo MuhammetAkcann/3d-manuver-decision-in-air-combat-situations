@@ -47,7 +47,9 @@ class PPO:
         self.act_dim = env.action_space.shape[0]
 
         self.rival_policy = FeedForwardNN(self.obs_dim, self.act_dim)
-        self.rival_policy.load_state_dict(torch.load(args.rival_actor))
+        if len(args.rival_actor) > 1:
+            print("loading rival")
+            self.rival_policy.load_state_dict(torch.load(args.rival_actor))
 
         # Initialize actor and critic networks
         self.actor = policy_class(self.obs_dim, self.act_dim)  # ALG STEP 1
@@ -241,6 +243,7 @@ class PPO:
 
                 obs, rival_obs, rew, done, rival_rew = self.env.step(both_action)
                 obs = self.arrange_observation(obs)
+                # print("obs:", obs)
                 # Track recent reward, action, and action log probability
                 ep_rews.append(rew)
                 ep_rews_rival.append(rival_rew)
