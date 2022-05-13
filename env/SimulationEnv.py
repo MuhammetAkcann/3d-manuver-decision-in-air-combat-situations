@@ -130,7 +130,7 @@ class SimulationEnv(gym.Env):
 
         self.current_step += 1
 
-        thresh = 13 - self.current_step * 0.02
+        thresh = 12 - self.current_step * 0.02
 
         reward, rival_reward = self.calculate_advantage()
 
@@ -138,9 +138,9 @@ class SimulationEnv(gym.Env):
         done = -1 if rival_reward > thresh else done
 
         if done == 1:
-            reward = 50
-        if done == -1:
-            reward = -50
+            reward = 50 - self.current_step * 0.02
+        #if done == -1:
+        #    reward = -50
 
         obs = self._next_observation(self.uav1, self.uav2)
         obs_rival = self._next_observation(self.uav2, self.uav1)
