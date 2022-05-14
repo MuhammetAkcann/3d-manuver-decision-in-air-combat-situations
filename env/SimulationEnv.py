@@ -38,7 +38,7 @@ class SimulationEnv(gym.Env):
     def __init__(self):
         super(SimulationEnv, self).__init__()
         self.uav1 = UAV(27)
-        self.uav2 = UAV(22)
+        self.uav2 = UAV(21)
         self.uav_list = [self.uav1, self.uav2]
         self.num_states = 11
         self.num_actions = 27
@@ -150,7 +150,7 @@ class SimulationEnv(gym.Env):
     def reset(self):
         # Reset the state of the environment to an initial state
         self.uav1 = UAV(27)
-        self.uav2 = UAV(22)
+        self.uav2 = UAV(21)
         self.uav_list = [self.uav1, self.uav2]
         self.current_step = 0
 
