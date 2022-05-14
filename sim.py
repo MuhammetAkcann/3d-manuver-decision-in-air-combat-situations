@@ -44,8 +44,10 @@ def update_lines(num, dataLines, lines):
     string = "OR: " + str(np_rewards[counter % np_rewards.shape[0]][0])[0:5]
     string2 = "DR: " + str(np_rewards[counter % np_rewards.shape[0]][1])[0:5]
 
-    print(string)
-    print(string2)
+
+    if(np_rewards[counter % np_rewards.shape[0]][0] + np_rewards[counter % np_rewards.shape[0]][1]) > 24:
+        print("counter:", counter)
+        print((np_rewards[counter % np_rewards.shape[0]][0] + np_rewards[counter % np_rewards.shape[0]][1])/2)
 
     counter += 1
     return lines
@@ -55,7 +57,7 @@ sims = sorted(os.listdir(folder), key=numericalSort, reverse=True)
 print(sims)
 
 for i in sims:
-    if "sim" in i:
+    if "npy" not in i:
         continue
     nparr = np.load(folder + "locations_" + i.split("_")[1].split(".")[0] + ".npy")
     np_rewards = np.load(folder + "rewards_" + i.split("_")[1].split(".")[0] + ".npy")
@@ -69,13 +71,13 @@ for i in sims:
     counter = 0
     fig = plt.figure()
     ax = p3.Axes3D(fig)
-    ax.set_xlim3d([-50, 50.0])
+    ax.set_xlim3d([-80, 80.0])
     ax.set_xlabel('X')
 
-    ax.set_ylim3d([-50.0, 50.0])
+    ax.set_ylim3d([-80.0, 80.0])
     ax.set_ylabel('Y')
 
-    ax.set_zlim3d([-50.0, 50.0])
+    ax.set_zlim3d([-80.0, 80.0])
     ax.set_zlabel('Z')
     blue = np.array([nparr[0][0], nparr[1][0], nparr[2][0]])
     red = np.array([nparr[0][1], nparr[1][1], nparr[2][1]])
@@ -83,7 +85,7 @@ for i in sims:
     print(len(data[0][0]))
     lines = [ax.plot(dat[0, 0:1], dat[1, 0:1], dat[2, 0:1])[0] for dat in data]
     line_ani = animation.FuncAnimation(fig, update_lines, len(data[0][0]), fargs=(data, lines),
-                                       interval=50, blit=True)
+                                       interval=20, blit=True)
 
     plt.show()
     plt.close()

@@ -51,9 +51,16 @@ class PPO:
             print("loading rival")
             self.rival_policy.load_state_dict(torch.load(args.rival_actor))
 
+        torch.save(self.rival_policy.state_dict(), 'PPO/weights/backup/rival_policy.pth')
+
+
+
         # Initialize actor and critic networks
         self.actor = policy_class(self.obs_dim, self.act_dim)  # ALG STEP 1
         self.critic = policy_class(self.obs_dim, 1)
+
+        torch.save(self.actor.state_dict(), 'PPO/weights/backup/initial/ppo_actor.pth')
+        torch.save(self.critic.state_dict(), 'PPO/weights/backup/initial/ppo_critic.pth')
 
         self.shadows = args.shadows
         self.noises = args.noises
@@ -76,6 +83,7 @@ class PPO:
             'actor_losses': [],  # losses of actor network in current iteration
             'avg_batch_losses': [],
             'avg_batch_rewards': [],
+            'sum_batch_rewards': [],
             'avg_batch_rewards_rival': [],
             'batch_rews_rival': [],
             'batch_win': [],
@@ -431,6 +439,7 @@ class PPO:
         i_so_far = self.logger['i_so_far']
         avg_ep_lens = np.mean(self.logger['batch_lens'])
         avg_ep_rews = np.mean([np.mean(ep_rews) for ep_rews in self.logger['batch_rews']])
+        sum_ep_rews = np.mean([np.sum(ep_rews) for ep_rews in self.logger['batch_rews']])
         avg_ep_rews_last_50 = [np.mean(ep_rews[-50:]) for ep_rews in self.logger['batch_rews']]
         avg_ep_rews_rival = np.mean([np.mean(ep_rews) for ep_rews in self.logger['batch_rews_rival']])
         avg_ep_rews_rival_last_50 = [np.mean(ep_rews[-50:]) for ep_rews in self.logger['batch_rews_rival']]
@@ -439,12 +448,15 @@ class PPO:
         # Round decimal places for more aesthetic logging messages
         avg_ep_lens = round(avg_ep_lens, 2)
         avg_ep_rews = round(avg_ep_rews, 2)
+        sum_ep_rews = round(sum_ep_rews, 2)
+
         avg_ep_rews_rival = round(avg_ep_rews_rival, 2)
         avg_actor_loss = round(avg_actor_loss, 5)
 
         self.logger['avg_batch_losses'].append(avg_actor_loss)
 
         self.logger['avg_batch_rewards'].append(avg_ep_rews)
+        self.logger['sum_batch_rewards'].append(sum_ep_rews)
         self.logger['avg_batch_rewards_rival'].append(avg_ep_rews_rival)
 
         loss_array = self.logger['avg_batch_losses'][-50:]
@@ -470,6 +482,7 @@ class PPO:
         print(f"-------------------- Iteration #{i_so_far} --------------------", flush=True)
         print(f"Average Episodic Length: {avg_ep_lens}", flush=True)
         print(f"Average Episodic Return: {avg_ep_rews}", flush=True)
+        print(f"Average Episodic Return sum: {sum_ep_rews}", flush=True)
         print(f"Average Episodic Return Rival: {avg_ep_rews_rival}", flush=True)
         print(f"Average Loss: {avg_actor_loss}", flush=True)
         print(f"Timesteps So Far: {t_so_far}", flush=True)
@@ -485,6 +498,7 @@ class PPO:
         print(flush=True)
 
         writer.add_scalar("general/AVG_episode_rewards", float(avg_ep_rews), i_so_far)
+        writer.add_scalar("general/SUM_episode_rewards", float(sum_ep_rews), i_so_far)
         writer.add_scalar("general/AVG_rival_episode_rewards", float(avg_ep_rews_rival), i_so_far)
         writer.add_scalar("general/AVG_Loss", float(avg_actor_loss), i_so_far)
 

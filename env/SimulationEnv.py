@@ -37,8 +37,8 @@ class SimulationEnv(gym.Env):
 
     def __init__(self):
         super(SimulationEnv, self).__init__()
-        self.uav1 = UAV()
-        self.uav2 = UAV()
+        self.uav1 = UAV(27)
+        self.uav2 = UAV(22)
         self.uav_list = [self.uav1, self.uav2]
         self.num_states = 11
         self.num_actions = 27
@@ -130,7 +130,7 @@ class SimulationEnv(gym.Env):
 
         self.current_step += 1
 
-        thresh = 12 - self.current_step * 0.02
+        thresh = 13 - self.current_step * 0.02
 
         reward, rival_reward = self.calculate_advantage()
 
@@ -138,7 +138,7 @@ class SimulationEnv(gym.Env):
         done = -1 if rival_reward > thresh else done
 
         if done == 1:
-            reward = 50 - self.current_step * 0.02
+            reward = 2000 - self.current_step * 1.5
         #if done == -1:
         #    reward = -50
 
@@ -149,8 +149,8 @@ class SimulationEnv(gym.Env):
 
     def reset(self):
         # Reset the state of the environment to an initial state
-        self.uav1 = UAV()
-        self.uav2 = UAV()
+        self.uav1 = UAV(27)
+        self.uav2 = UAV(22)
         self.uav_list = [self.uav1, self.uav2]
         self.current_step = 0
 

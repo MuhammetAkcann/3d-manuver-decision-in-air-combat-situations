@@ -22,7 +22,7 @@ def get_args():
     parser.add_argument('--actor_model', dest='actor_model', type=str, default='')
     parser.add_argument('--critic_model', dest='critic_model', type=str, default='')
 
-    parser.add_argument('--rival_actor', dest='rival_actor', type=str, default='PPO/weights/backup/random_rival/ppo_actor.pth')
+    parser.add_argument('--rival_actor', dest='rival_actor', type=str, default='PPO/weights/backup/random_rival/ppo_actor.pth') # PPO/weights/rival_actor.pth
 
     parser.add_argument('--shadows', dest='shadows', type=str, nargs='+', default="")
     parser.add_argument('--noises', dest='noises', type=str, nargs='+', default="")
