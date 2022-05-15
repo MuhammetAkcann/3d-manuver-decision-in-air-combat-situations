@@ -32,7 +32,6 @@ def get_nd(uav1, uav2, beta1=8, beta2=0.7, d_max=30, d_min=0):
 
 class SimulationEnv(gym.Env):
     """A 3D flight simulation environment for OpenAI gym"""
-    metadata = {'render.modes': ['live', 'file', 'none']}
     visualization = None
 
     def __init__(self):
